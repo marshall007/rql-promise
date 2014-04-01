@@ -17,6 +17,9 @@
     "when": "~2.6.0",
     "generic-pool": "~2.0.4"
   },
+  "peerDependencies": {
+    "rethinkdb": "1.x"
+  },
   "keywords": [
     "rethinkdb",
     "database",
