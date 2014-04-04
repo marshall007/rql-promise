@@ -6,17 +6,28 @@ var r = require('rethinkdb'),
 
 var _connPool, _connected = false;
 
-var rql = module.exports = function (query) {
+var ensureArray = function (cursor) {
+  if (typeof(cursor.toArray) === 'function') {
+    return nodefn.call(cursor.toArray.bind(cursor));
+  }
+  return cursor;
+};
+
+var rql = module.exports = function (query, coerce) {
   if (!_connected) {
     return when.reject('RQL Promise Error : Not connected');
   }
-  return nodefn.call(_connPool.acquire.bind(_connPool)).
+  var result = nodefn.call(_connPool.acquire.bind(_connPool)).
   then(function (dbConn) {
     return nodefn.call(query.run.bind(query), dbConn).
     ensure(function () {
       fn.call(_connPool.release.bind(_connPool), dbConn);
     });
   });
+  if (coerce) {
+    return result.then(ensureArray);
+  }
+  return result;
 };
 
 var disconnect = module.exports.disconnect = function () {
